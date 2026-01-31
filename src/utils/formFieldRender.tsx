@@ -5,7 +5,7 @@ import Select from "react-select";
 import { IconType } from "react-icons";
 import { Button, FormGroup, Label } from "reactstrap";
 import { FiX } from "react-icons/fi";
-import { Editor } from "@components/Editor";
+import  Editor  from "@components/Editor";
 
 export type IFormRender = {
   field: FormField;
