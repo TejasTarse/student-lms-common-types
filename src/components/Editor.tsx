@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
+import JoditEditor from "jodit-react";
 
 type Props = {
   placeholder?: string;
@@ -7,38 +8,7 @@ type Props = {
 };
 
 const Editor = ({ placeholder, content, setContent }: Props) => {
-  const editorRef = useRef<any>(null);
-
-  // ⭐ use any to avoid component-type mismatch
-  const [JoditEditor, setJoditEditor] = useState<any>(null);
-
-  useEffect(() => {
-    let mounted = true;
-
-    const loadEditor = async () => {
-      try {
-        const mod = await import("jodit-react");
-
-        if (mounted) {
-          // ⭐ IMPORTANT FIX
-          setJoditEditor(() => mod.default || mod);
-        }
-      } catch (err) {
-        console.error("Failed to load Jodit editor", err);
-      }
-    };
-
-    if (typeof window !== "undefined") {
-      loadEditor();
-    }
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  // SSR safe
-  if (!JoditEditor) return null;
+  const editorRef = useRef(null);
 
   const config = {
     readonly: false,
@@ -57,4 +27,4 @@ const Editor = ({ placeholder, content, setContent }: Props) => {
   );
 };
 
-export default Editor; // ⭐ default export (recommended)
+export default Editor;
