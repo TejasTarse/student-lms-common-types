@@ -6,32 +6,39 @@ type Props = {
   setContent: (content: string) => void;
 };
 
-export const Editor = ({ placeholder, content, setContent }: Props) => {
+const Editor = ({ placeholder, content, setContent }: Props) => {
   const editorRef = useRef<any>(null);
-  const [JoditEditor, setJoditEditor] =
-    useState<React.ComponentType<any> | null>(null);
+
+  // ⭐ use any to avoid component-type mismatch
+  const [JoditEditor, setJoditEditor] = useState<any>(null);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
     let mounted = true;
 
-    import("jodit-react")
-      .then((mod) => {
+    const loadEditor = async () => {
+      try {
+        const mod = await import("jodit-react");
+
         if (mounted) {
-          setJoditEditor(() => mod.default);
+          // ⭐ IMPORTANT FIX
+          setJoditEditor(() => mod.default || mod);
         }
-      })
-      .catch(() => {
-        console.error("Failed to load Jodit editor");
-      });
+      } catch (err) {
+        console.error("Failed to load Jodit editor", err);
+      }
+    };
+
+    if (typeof window !== "undefined") {
+      loadEditor();
+    }
 
     return () => {
       mounted = false;
     };
   }, []);
 
-  if (!JoditEditor) return null; // ⛔ backend & SSR safe
+  // SSR safe
+  if (!JoditEditor) return null;
 
   const config = {
     readonly: false,
@@ -45,7 +52,9 @@ export const Editor = ({ placeholder, content, setContent }: Props) => {
       value={content}
       config={config}
       tabIndex={1}
-      onBlur={(newContent: string) => setContent(newContent)}
+      onBlur={(val: string) => setContent(val)}
     />
   );
 };
+
+export default Editor; // ⭐ default export (recommended)
